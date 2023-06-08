@@ -1,7 +1,6 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
+import 'package:meu_quiz/models/country_model.dart';
 import 'package:meu_quiz/wigets/button_widget.dart';
 import 'package:meu_quiz/wigets/container_widget.dart';
 
@@ -13,17 +12,9 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  dynamic pais;
-
-  dynamic paisSorteadoId;
-  dynamic paisSorteadoNome;
-  dynamic paisSorteadoImage;
-
-  String? segundaOpcao;
-  String? terceiraOpcao;
-  String? quartaOpcao;
-
-  List<String?>? countries;
+  String? paisSorteadoNome;
+  CountryQuizInfo? countryQuiz;
+  List<String> countries = [];
 
   @override
   void initState() {
@@ -34,29 +25,22 @@ class _HomePageState extends State<HomePage> {
   Future<void> getApi() async {
     final response = await Dio().get('http://192.168.0.106/api/');
     setState(() {
-      pais = jsonDecode(response.data);
-      paisSorteadoNome = pais[0]['nome'];
-      segundaOpcao = pais[1];
-      terceiraOpcao = pais[2];
-      quartaOpcao = pais[3];
-
-      final opcoes = <String?>[
-        paisSorteadoNome,
-        segundaOpcao,
-        terceiraOpcao,
-        quartaOpcao
-      ];
-
-      countries = opcoes;
-      countries?.shuffle();
+      countryQuiz = CountryQuizInfo.fromJson(response.data);
+      countries = countryQuiz!.countriesRandom;
     });
+  }
+
+  void showSucessOrError() {
+    
   }
 
   void returnResponse(dynamic response) {
     if (response == paisSorteadoNome) {
-      print('acertou $paisSorteadoNome');
+      
+      getApi();
     } else {
-      print('errou $paisSorteadoNome');
+      //print('errou $paisSorteadoNome');
+      getApi();
     }
   }
 
@@ -86,10 +70,10 @@ class _HomePageState extends State<HomePage> {
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 20),
-                      if (pais != null)
+                      if (countryQuiz != null)
                         Expanded(
                           child: Image.network(
-                            'http://192.168.0.106/api/images/${pais?[0]['imagem']}',
+                            'http://192.168.0.106/api/images/${countryQuiz!.countryData.imagem}',
                           ),
                         ),
                     ],
@@ -100,32 +84,22 @@ class _HomePageState extends State<HomePage> {
                 width: 350,
                 height: 350,
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    ButtonRariusWidget(
-                      text: countries?[0] ?? 'Não tem dados',
-                      aoPressionar: returnResponse,
-                    ),
-                    ButtonRariusWidget(
-                      text: countries?[1] ?? 'Não tem dados',
-                      aoPressionar: returnResponse,
-                    ),
-                    ButtonRariusWidget(
-                      text: countries?[2] ?? 'Não tem dados',
-                      aoPressionar: returnResponse,
-                    ),
-                    ButtonRariusWidget(
-                      text: countries?[3] ?? 'Não tem dados',
-                      aoPressionar: returnResponse,
-                    ),
-                  ],
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: List.generate(
+                    countries.length,
+                    (index) {
+                      final String countryName = countries[index];
+                      return ButtonRariusWidget(
+                        text: countryName,
+                        aoPressionar: returnResponse,
+                      );
+                    },
+                  ),
                 ),
               ),
               GestureDetector(
                 onTap: () {
-                  setState(() {
-                    getApi();
-                  });
+                  getApi();
                 },
                 child: const ContainerRadiusWidget(
                   width: 350,
