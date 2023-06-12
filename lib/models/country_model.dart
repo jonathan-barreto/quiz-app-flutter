@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 class CountryQuizInfo {
   final CountryDataModel countryData;
   final List<String> countries;
@@ -16,25 +14,20 @@ class CountryQuizInfo {
     return countriesNews;
   }
 
-  Map<String, dynamic> toMap() {
+  factory CountryQuizInfo.fromJson(Map<String, dynamic> json) {
+    return CountryQuizInfo(
+      countryData:
+          CountryDataModel.fromMap(json['countryData'] as Map<String, dynamic>),
+      countries: List<String>.from((json['countries'])),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'countryData': countryData.toMap(),
       'contries': countries,
     };
   }
-
-  factory CountryQuizInfo.fromMap(Map<String, dynamic> map) {
-    return CountryQuizInfo(
-      countryData:
-          CountryDataModel.fromMap(map['countryData'] as Map<String, dynamic>),
-      countries: List<String>.from((map['countries'])),
-    );
-  }
-
-  String toJson() => json.encode(toMap());
-
-  factory CountryQuizInfo.fromJson(String source) =>
-      CountryQuizInfo.fromMap(json.decode(source) as Map<String, dynamic>);
 }
 
 class CountryDataModel {
@@ -48,16 +41,19 @@ class CountryDataModel {
     required this.imagem,
   });
 
-  factory CountryDataModel.fromMap(Map<String, dynamic> json) =>
-      CountryDataModel(
-        id: json["id"],
-        nome: json["nome"],
-        imagem: json["imagem"],
-      );
+  factory CountryDataModel.fromMap(Map<String, dynamic> json) {
+    return CountryDataModel(
+      id: json["id"],
+      nome: json["nome"],
+      imagem: json["imagem"],
+    );
+  }
 
-  Map<String, dynamic> toMap() => {
-        "id": id,
-        "nome": nome,
-        "imagem": imagem,
-      };
+  Map<String, dynamic> toMap() {
+    return {
+      "id": id,
+      "nome": nome,
+      "imagem": imagem,
+    };
+  }
 }
